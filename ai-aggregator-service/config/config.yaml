@@ -1,0 +1,5 @@
+# This file is deprecated. Use .env file for configuration instead.
+# See .env.example for all available configuration options.
+
+# Configuration is now handled exclusively through environment variables.
+# The .env file should contain all necessary configuration.
