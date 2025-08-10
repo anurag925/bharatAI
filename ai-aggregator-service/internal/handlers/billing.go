@@ -108,6 +108,17 @@ type AddPaymentMethodRequest struct {
 }
 
 // GetAccount handles GET /billing/account
+// @Summary Get billing account information
+// @Description Retrieves the current user's billing account details including plan information, balance, and billing status
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} BillingAccount "Successfully retrieved billing account"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 404 {object} map[string]interface{} "Billing account not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/account [get]
 func (h *handler) GetAccount(c echo.Context) error {
 	// TODO: Get user ID from context
 	// TODO: Fetch billing account from database
@@ -155,6 +166,20 @@ func (h *handler) GetAccount(c echo.Context) error {
 }
 
 // GetUsage handles GET /billing/usage
+// @Summary Get usage statistics
+// @Description Retrieves usage statistics for the current billing period or specified date range
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param start_date query string false "Start date for usage period (YYYY-MM-DD format)"
+// @Param end_date query string false "End date for usage period (YYYY-MM-DD format)"
+// @Success 200 {object} Usage "Successfully retrieved usage statistics"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid date format"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 404 {object} map[string]interface{} "Usage data not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/usage [get]
 func (h *handler) GetUsage(c echo.Context) error {
 	// Parse query parameters
 	startDate := c.QueryParam("start_date")
@@ -217,6 +242,20 @@ func (h *handler) GetUsage(c echo.Context) error {
 }
 
 // GetInvoices handles GET /billing/invoices
+// @Summary Get all invoices
+// @Description Retrieves a paginated list of invoices for the authenticated user with optional filtering by status
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param limit query int false "Number of invoices to return (default: 20, max: 100)" default(20) minimum(1) maximum(100)
+// @Param offset query int false "Number of invoices to skip for pagination (default: 0)" default(0) minimum(0)
+// @Param status query string false "Filter invoices by status" Enums(draft, open, paid, void, uncollectible)
+// @Success 200 {object} map[string]interface{} "Successfully retrieved invoices list"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid query parameters"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/invoices [get]
 func (h *handler) GetInvoices(c echo.Context) error {
 	// Parse query parameters
 	limit := c.QueryParam("limit")
@@ -299,6 +338,19 @@ func (h *handler) GetInvoices(c echo.Context) error {
 }
 
 // GetInvoice handles GET /billing/invoices/:invoice_id
+// @Summary Get specific invoice
+// @Description Retrieves detailed information about a specific invoice by ID
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param invoice_id path string true "Invoice ID" example("inv_1234567890abcdef")
+// @Success 200 {object} Invoice "Successfully retrieved invoice details"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid invoice ID format"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 404 {object} map[string]interface{} "Invoice not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/invoices/{invoice_id} [get]
 func (h *handler) GetInvoice(c echo.Context) error {
 	invoiceID := c.Param("invoice_id")
 	if invoiceID == "" {
@@ -351,6 +403,19 @@ func (h *handler) GetInvoice(c echo.Context) error {
 }
 
 // AddPaymentMethod handles POST /billing/payment-methods
+// @Summary Add payment method
+// @Description Adds a new payment method to the user's billing account
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param payment_method body AddPaymentMethodRequest true "Payment method details"
+// @Success 201 {object} map[string]interface{} "Payment method added successfully"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid payment method data"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/payment-methods [post]
 func (h *handler) AddPaymentMethod(c echo.Context) error {
 	var req AddPaymentMethodRequest
 	if err := c.Bind(&req); err != nil {
@@ -383,6 +448,16 @@ func (h *handler) AddPaymentMethod(c echo.Context) error {
 }
 
 // GetPaymentMethods handles GET /billing/payment-methods
+// @Summary Get payment methods
+// @Description Retrieves all payment methods associated with the user's billing account
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{} "Successfully retrieved payment methods"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/payment-methods [get]
 func (h *handler) GetPaymentMethods(c echo.Context) error {
 	// TODO: Get user ID from context
 	// TODO: Fetch payment methods from database
@@ -418,6 +493,20 @@ func (h *handler) GetPaymentMethods(c echo.Context) error {
 }
 
 // DeletePaymentMethod handles DELETE /billing/payment-methods/:payment_method_id
+// @Summary Delete payment method
+// @Description Removes a payment method from the user's billing account
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param payment_method_id path string true "Payment method ID to delete" example("pm_1234567890abcdef")
+// @Success 204 "Payment method deleted successfully"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid payment method ID"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 404 {object} map[string]interface{} "Payment method not found"
+// @Failure 409 {object} map[string]interface{} "Conflict - Cannot delete default payment method"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/payment-methods/{payment_method_id} [delete]
 func (h *handler) DeletePaymentMethod(c echo.Context) error {
 	paymentMethodID := c.Param("payment_method_id")
 	if paymentMethodID == "" {
@@ -442,6 +531,20 @@ func (h *handler) DeletePaymentMethod(c echo.Context) error {
 }
 
 // UpdatePlan handles PUT /billing/plan
+// @Summary Update subscription plan
+// @Description Updates the user's current subscription plan to a new plan
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param plan_update body struct{PlanID string "json:\"plan_id\" validate:\"required\""} true "Plan update details"
+// @Success 200 {object} map[string]interface{} "Successfully updated plan"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid plan ID"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 404 {object} map[string]interface{} "Plan not found"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/plan [put]
 func (h *handler) UpdatePlan(c echo.Context) error {
 	var req struct {
 		PlanID string `json:"plan_id" validate:"required"`
@@ -468,6 +571,16 @@ func (h *handler) UpdatePlan(c echo.Context) error {
 }
 
 // GetPlans handles GET /billing/plans
+// @Summary Get available plans
+// @Description Retrieves all available subscription plans with their features and pricing
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{} "Successfully retrieved plans"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/plans [get]
 func (h *handler) GetPlans(c echo.Context) error {
 	// Mock response for now
 	plans := []Plan{
@@ -549,4 +662,303 @@ func (h *handler) GetPlans(c echo.Context) error {
 		"plans": plans,
 		"total": len(plans),
 	})
+}
+
+// DownloadInvoice handles GET /billing/invoices/:invoice_id/download
+// @Summary Download invoice PDF
+// @Description Downloads the PDF file for a specific invoice
+// @Tags billing
+// @Accept json
+// @Produce application/pdf
+// @Security BearerAuth
+// @Param invoice_id path string true "Invoice ID" example("inv_1234567890abcdef")
+// @Success 200 {file} binary "PDF file download"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid invoice ID"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 404 {object} map[string]interface{} "Invoice not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/invoices/{invoice_id}/download [get]
+func (h *handler) DownloadInvoice(c echo.Context) error {
+	invoiceID := c.Param("invoice_id")
+	if invoiceID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": map[string]interface{}{
+				"code":    "INVALID_REQUEST",
+				"message": "Invoice ID is required",
+			},
+		})
+	}
+
+	// TODO: Validate invoice ID format
+	// TODO: Get user ID from context
+	// TODO: Check if invoice belongs to user
+	// TODO: Generate or retrieve PDF from billing provider
+
+	// Mock response - return PDF download headers
+	c.Response().Header().Set("Content-Type", "application/pdf")
+	c.Response().Header().Set("Content-Disposition", "attachment; filename=invoice_"+invoiceID+".pdf")
+
+	return c.String(http.StatusOK, "PDF content would be returned here")
+}
+
+// CreateSubscription handles POST /billing/subscription
+// @Summary Create new subscription
+// @Description Creates a new subscription for the authenticated user
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param subscription body CreateSubscriptionRequest true "Subscription creation details"
+// @Success 201 {object} map[string]interface{} "Subscription created successfully"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid subscription data"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/subscription [post]
+func (h *handler) CreateSubscription(c echo.Context) error {
+	var req struct {
+		PlanID          string `json:"plan_id" validate:"required"`
+		PaymentMethodID string `json:"payment_method_id" validate:"required"`
+	}
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": map[string]interface{}{
+				"code":    "INVALID_REQUEST",
+				"message": "Invalid request format",
+			},
+		})
+	}
+
+	// TODO: Validate request
+	// TODO: Get user ID from context
+	// TODO: Create subscription with billing provider
+	// TODO: Store subscription in database
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "Subscription created successfully",
+		"plan_id": req.PlanID,
+	})
+}
+
+// UpdateSubscription handles PUT /billing/subscription
+// @Summary Update existing subscription
+// @Description Updates the current subscription (plan change, payment method, etc.)
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param subscription body UpdateSubscriptionRequest true "Subscription update details"
+// @Success 200 {object} map[string]interface{} "Subscription updated successfully"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid subscription data"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/subscription [put]
+func (h *handler) UpdateSubscription(c echo.Context) error {
+	var req struct {
+		PlanID          string `json:"plan_id"`
+		PaymentMethodID string `json:"payment_method_id"`
+	}
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": map[string]interface{}{
+				"code":    "INVALID_REQUEST",
+				"message": "Invalid request format",
+			},
+		})
+	}
+
+	// TODO: Validate request
+	// TODO: Get user ID from context
+	// TODO: Update subscription with billing provider
+	// TODO: Update subscription in database
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Subscription updated successfully",
+	})
+}
+
+// CancelSubscription handles DELETE /billing/subscription
+// @Summary Cancel subscription
+// @Description Cancels the current subscription at the end of the billing period
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param cancel body CancelSubscriptionRequest false "Cancellation details"
+// @Success 200 {object} map[string]interface{} "Subscription scheduled for cancellation"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid cancellation data"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 404 {object} map[string]interface{} "Subscription not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/subscription [delete]
+func (h *handler) CancelSubscription(c echo.Context) error {
+	var req struct {
+		Reason    string `json:"reason"`
+		Feedback  string `json:"feedback"`
+		Immediate bool   `json:"immediate"`
+	}
+
+	if err := c.Bind(&req); err != nil {
+		// Allow empty body for cancellation
+		req = struct {
+			Reason    string `json:"reason"`
+			Feedback  string `json:"feedback"`
+			Immediate bool   `json:"immediate"`
+		}{}
+	}
+
+	// TODO: Get user ID from context
+	// TODO: Cancel subscription with billing provider
+	// TODO: Update subscription status in database
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":           "Subscription scheduled for cancellation",
+		"cancellation_date": time.Now().AddDate(0, 0, 30),
+	})
+}
+
+// GetSubscription handles GET /billing/subscription
+// @Summary Get current subscription
+// @Description Retrieves the current subscription details for the authenticated user
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{} "Successfully retrieved subscription"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 404 {object} map[string]interface{} "Subscription not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/subscription [get]
+func (h *handler) GetSubscription(c echo.Context) error {
+	// TODO: Get user ID from context
+	// TODO: Fetch subscription from database
+
+	// Mock response
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"id":     "sub_" + generateID(),
+		"status": "active",
+		"plan": Plan{
+			ID:          "plan_pro",
+			Name:        "Pro Plan",
+			Description: "Professional plan with advanced features",
+			Price:       29.99,
+			Currency:    "usd",
+			Interval:    "monthly",
+		},
+		"current_period_start": time.Now(),
+		"current_period_end":   time.Now().AddDate(0, 1, 0),
+	})
+}
+
+// UpdatePaymentMethod handles PUT /billing/payment-methods/:payment_method_id
+// @Summary Update payment method
+// @Description Updates an existing payment method's details
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param payment_method_id path string true "Payment method ID" example("pm_1234567890abcdef")
+// @Param payment_method body UpdatePaymentMethodRequest true "Payment method update details"
+// @Success 200 {object} PaymentMethod "Successfully updated payment method"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid payment method data"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 404 {object} map[string]interface{} "Payment method not found"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/payment-methods/{payment_method_id} [put]
+func (h *handler) UpdatePaymentMethod(c echo.Context) error {
+	paymentMethodID := c.Param("payment_method_id")
+	if paymentMethodID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": map[string]interface{}{
+				"code":    "INVALID_REQUEST",
+				"message": "Payment method ID is required",
+			},
+		})
+	}
+
+	var req struct {
+		ExpMonth int `json:"exp_month"`
+		ExpYear  int `json:"exp_year"`
+	}
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": map[string]interface{}{
+				"code":    "INVALID_REQUEST",
+				"message": "Invalid request format",
+			},
+		})
+	}
+
+	// TODO: Validate request
+	// TODO: Get user ID from context
+	// TODO: Check if payment method belongs to user
+	// TODO: Update payment method with billing provider
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Payment method updated successfully",
+		"id":      paymentMethodID,
+	})
+}
+
+// SetDefaultPaymentMethod handles POST /billing/payment-methods/:payment_method_id/default
+// @Summary Set default payment method
+// @Description Sets a payment method as the default for the user's billing account
+// @Tags billing
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param payment_method_id path string true "Payment method ID to set as default" example("pm_1234567890abcdef")
+// @Success 200 {object} map[string]interface{} "Successfully set default payment method"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid payment method ID"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or missing token"
+// @Failure 404 {object} map[string]interface{} "Payment method not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /billing/payment-methods/{payment_method_id}/default [post]
+func (h *handler) SetDefaultPaymentMethod(c echo.Context) error {
+	paymentMethodID := c.Param("payment_method_id")
+	if paymentMethodID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": map[string]interface{}{
+				"code":    "INVALID_REQUEST",
+				"message": "Payment method ID is required",
+			},
+		})
+	}
+
+	// TODO: Validate payment method ID format
+	// TODO: Get user ID from context
+	// TODO: Check if payment method belongs to user
+	// TODO: Update default payment method in database
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":           "Default payment method updated successfully",
+		"payment_method_id": paymentMethodID,
+	})
+}
+
+// Request type definitions for missing handlers
+type CreateSubscriptionRequest struct {
+	PlanID          string `json:"plan_id" validate:"required"`
+	PaymentMethodID string `json:"payment_method_id" validate:"required"`
+}
+
+type UpdateSubscriptionRequest struct {
+	PlanID          string `json:"plan_id"`
+	PaymentMethodID string `json:"payment_method_id"`
+}
+
+type CancelSubscriptionRequest struct {
+	Reason    string `json:"reason"`
+	Feedback  string `json:"feedback"`
+	Immediate bool   `json:"immediate"`
+}
+
+type UpdatePaymentMethodRequest struct {
+	ExpMonth int `json:"exp_month"`
+	ExpYear  int `json:"exp_year"`
 }

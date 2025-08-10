@@ -60,7 +60,19 @@ type LogoutRequest struct {
 	RefreshToken string `json:"refresh_token" validate:"required"`
 }
 
-// Login handles POST /auth/login
+// Login godoc
+// @Summary User login
+// @Description Authenticate user with email and password to obtain access and refresh tokens
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param login body LoginRequest true "Login credentials"
+// @Success 200 {object} LoginResponse "Successfully authenticated"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid request format"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid credentials"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /auth/login [post]
 func (h *handler) Login(c echo.Context) error {
 	var req LoginRequest
 	if err := c.Bind(&req); err != nil {
@@ -94,7 +106,19 @@ func (h *handler) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-// Register handles POST /auth/register
+// Register godoc
+// @Summary User registration
+// @Description Register a new user account with email, password, and personal details
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param register body RegisterRequest true "Registration details"
+// @Success 201 {object} RegisterResponse "User successfully registered"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid request format"
+// @Failure 409 {object} map[string]interface{} "Conflict - Email or username already exists"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /auth/register [post]
 func (h *handler) Register(c echo.Context) error {
 	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
@@ -127,7 +151,19 @@ func (h *handler) Register(c echo.Context) error {
 	return c.JSON(http.StatusCreated, response)
 }
 
-// RefreshToken handles POST /auth/refresh
+// RefreshToken godoc
+// @Summary Refresh access token
+// @Description Generate a new access token using a valid refresh token
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param refresh body RefreshTokenRequest true "Refresh token details"
+// @Success 200 {object} RefreshTokenResponse "New access token generated successfully"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid request format"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or expired refresh token"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /auth/refresh [post]
 func (h *handler) RefreshToken(c echo.Context) error {
 	var req RefreshTokenRequest
 	if err := c.Bind(&req); err != nil {
@@ -154,7 +190,19 @@ func (h *handler) RefreshToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-// Logout handles POST /auth/logout
+// Logout godoc
+// @Summary User logout
+// @Description Logout user by invalidating refresh token and clearing session
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param logout body LogoutRequest true "Logout details"
+// @Success 200 {object} map[string]interface{} "Successfully logged out"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid request format"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid refresh token"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /auth/logout [post]
 func (h *handler) Logout(c echo.Context) error {
 	var req LogoutRequest
 	if err := c.Bind(&req); err != nil {
@@ -176,7 +224,17 @@ func (h *handler) Logout(c echo.Context) error {
 	})
 }
 
-// Me handles GET /auth/me (get current user info)
+// Me godoc
+// @Summary Get current user
+// @Description Retrieve information about the currently authenticated user
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} UserInfo "Current user information"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Missing or invalid access token"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /auth/me [get]
 func (h *handler) Me(c echo.Context) error {
 	// TODO: Get user from context (after authentication middleware)
 	// Mock response for now
@@ -190,7 +248,18 @@ func (h *handler) Me(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-// ForgotPassword handles POST /auth/forgot-password
+// ForgotPassword godoc
+// @Summary Request password reset
+// @Description Send password reset email to the provided email address
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param forgotPassword body struct{Email string "json:\"email\" validate:\"required,email\""} true "Email for password reset"
+// @Success 200 {object} map[string]interface{} "Password reset email sent if email exists"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid request format"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /auth/forgot-password [post]
 func (h *handler) ForgotPassword(c echo.Context) error {
 	var req struct {
 		Email string `json:"email" validate:"required,email"`
@@ -214,7 +283,19 @@ func (h *handler) ForgotPassword(c echo.Context) error {
 	})
 }
 
-// ResetPassword handles POST /auth/reset-password
+// ResetPassword godoc
+// @Summary Reset user password
+// @Description Reset user password using a valid reset token
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param resetPassword body struct{Token string "json:\"token\" validate:\"required\""; NewPassword string "json:\"new_password\" validate:\"required,min=8\""} true "Password reset details"
+// @Success 200 {object} map[string]interface{} "Password successfully reset"
+// @Failure 400 {object} map[string]interface{} "Bad request - Invalid request format"
+// @Failure 401 {object} map[string]interface{} "Unauthorized - Invalid or expired reset token"
+// @Failure 422 {object} map[string]interface{} "Unprocessable entity - Validation errors"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /auth/reset-password [post]
 func (h *handler) ResetPassword(c echo.Context) error {
 	var req struct {
 		Token       string `json:"token" validate:"required"`
