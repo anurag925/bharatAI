@@ -1,6 +1,8 @@
 package main
 
 import (
+	"ai-aggregator-service/internal/config"
+	"ai-aggregator-service/internal/logger"
 	"context"
 	"fmt"
 	"log/slog"
@@ -10,8 +12,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ai-aggregator/ai-aggregator-service/internal/config"
-	"github.com/ai-aggregator/ai-aggregator-service/internal/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

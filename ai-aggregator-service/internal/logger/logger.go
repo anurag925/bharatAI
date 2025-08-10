@@ -1,10 +1,9 @@
 package logger
 
 import (
+	"ai-aggregator-service/internal/config"
 	"log/slog"
 	"os"
-
-	"github.com/ai-aggregator/ai-aggregator-service/internal/config"
 )
 
 func Init(cfg config.LoggingConfig) {
