@@ -1,6 +1,8 @@
 -- Create api_responses table
 CREATE TABLE IF NOT EXISTS api_responses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     request_id UUID REFERENCES api_requests(id) ON DELETE CASCADE,
     provider_id UUID REFERENCES providers(id) ON DELETE SET NULL,
     model_id UUID REFERENCES models(id) ON DELETE SET NULL,
@@ -10,8 +12,6 @@ CREATE TABLE IF NOT EXISTS api_responses (
     status_code INTEGER,
     latency_ms INTEGER,
     retry_count INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create indexes for api_responses

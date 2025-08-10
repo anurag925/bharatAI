@@ -1,6 +1,8 @@
 -- Create billing_accounts table
 CREATE TABLE IF NOT EXISTS billing_accounts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     account_type VARCHAR(50) NOT NULL DEFAULT 'organization',
@@ -14,8 +16,6 @@ CREATE TABLE IF NOT EXISTS billing_accounts (
     monthly_budget DECIMAL(10,2),
     alert_threshold DECIMAL(10,2) DEFAULT 10.0,
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     CONSTRAINT check_owner_type CHECK (
         (account_type = 'organization' AND organization_id IS NOT NULL AND user_id IS NULL) OR
         (account_type = 'user' AND user_id IS NOT NULL AND organization_id IS NULL)

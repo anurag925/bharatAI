@@ -1,6 +1,8 @@
 -- Create billing_transactions table
 CREATE TABLE IF NOT EXISTS billing_transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     billing_account_id UUID REFERENCES billing_accounts(id) ON DELETE CASCADE,
     api_request_id UUID REFERENCES api_requests(id) ON DELETE SET NULL,
     transaction_type VARCHAR(50) NOT NULL,
@@ -9,8 +11,6 @@ CREATE TABLE IF NOT EXISTS billing_transactions (
     description TEXT,
     metadata JSONB DEFAULT '{}'::jsonb,
     balance_after DECIMAL(10,2) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create indexes for billing_transactions

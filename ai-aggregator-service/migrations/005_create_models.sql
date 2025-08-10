@@ -1,6 +1,8 @@
 -- Create models table
 CREATE TABLE IF NOT EXISTS models (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     provider_id UUID REFERENCES providers(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     display_name VARCHAR(255) NOT NULL,
@@ -10,8 +12,6 @@ CREATE TABLE IF NOT EXISTS models (
     max_tokens INTEGER,
     input_cost_per_1k_tokens DECIMAL(10,6) DEFAULT 0.0,
     output_cost_per_1k_tokens DECIMAL(10,6) DEFAULT 0.0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     config JSONB DEFAULT '{}'::jsonb,
     capabilities JSONB DEFAULT '[]'::jsonb,
     UNIQUE(provider_id, name)

@@ -1,6 +1,8 @@
 -- Create providers table
 CREATE TABLE IF NOT EXISTS providers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     name VARCHAR(100) UNIQUE NOT NULL,
     display_name VARCHAR(255) NOT NULL,
     base_url VARCHAR(500) NOT NULL,
@@ -8,8 +10,6 @@ CREATE TABLE IF NOT EXISTS providers (
     is_active BOOLEAN DEFAULT TRUE,
     rate_limit_rpm INTEGER DEFAULT 1000,
     rate_limit_tpm INTEGER DEFAULT 100000,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     config JSONB DEFAULT '{}'::jsonb,
     supported_features JSONB DEFAULT '[]'::jsonb
 );

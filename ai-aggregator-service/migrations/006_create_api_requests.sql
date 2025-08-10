@@ -1,6 +1,8 @@
 -- Create api_requests table
 CREATE TABLE IF NOT EXISTS api_requests (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     api_key_id UUID REFERENCES api_keys(id) ON DELETE SET NULL,
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
     organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
@@ -22,8 +24,6 @@ CREATE TABLE IF NOT EXISTS api_requests (
     latency_ms INTEGER,
     ip_address INET,
     user_agent TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     completed_at TIMESTAMP WITH TIME ZONE
 );
 
