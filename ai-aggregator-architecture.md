@@ -39,7 +39,7 @@ graph TB
     subgraph "Data Layer"
         POSTGRES[(PostgreSQL<br/>Primary Database)]
         REDIS[(Redis<br/>Cache & Sessions)]
-        KAFKA[Kafka<br/>Event Streaming]
+        nats[nats<br/>Event Streaming]
         S3[S3<br/>File Storage]
     end
     
@@ -81,12 +81,12 @@ graph TB
     USER_MGMT --> POSTGRES
     BILLING --> POSTGRES
     ANALYTICS --> POSTGRES
-    ANALYTICS --> KAFKA
+    ANALYTICS --> nats
     
     CACHE --> REDIS
     RATE_LIMIT --> REDIS
     
-    MONITORING --> KAFKA
+    MONITORING --> nats
 ```
 
 ### Core Design Principles
@@ -117,7 +117,7 @@ graph TB
 ### Communication Patterns
 
 - **Synchronous**: REST APIs for real-time requests
-- **Asynchronous**: Kafka for event streaming
+- **Asynchronous**: nats for event streaming
 - **Caching**: Redis for session and response caching
 - **Database**: PostgreSQL for persistent storage
 
@@ -604,7 +604,7 @@ X-RateLimit-Window: 3600
 - **TTL**: 24 hours with cache busting
 
 ### Cache Invalidation Strategy
-- **Event-Driven**: Kafka events for cache updates
+- **Event-Driven**: nats events for cache updates
 - **Time-Based**: Automatic expiration
 - **Manual**: Admin API for forced invalidation
 
@@ -720,7 +720,7 @@ X-RateLimit-Window: 3600
 - **Stateless Services**: Easy horizontal scaling
 - **Database**: Read replicas, sharding by organization
 - **Cache**: Redis cluster with partitioning
-- **Queue**: Kafka cluster with topic partitioning
+- **Queue**: nats cluster with topic partitioning
 
 #### Vertical Scaling
 - **Database**: Instance size based on load
@@ -736,7 +736,7 @@ X-RateLimit-Window: 3600
 
 #### Disaster Recovery
 - **RTO**: 15 minutes
-- **RPO**: 1 minute (with Kafka streaming)
+- **RPO**: 1 minute (with nats streaming)
 - **Backup Strategy**: Daily snapshots, cross-region replication
 
 ### Resource Allocation
@@ -774,11 +774,11 @@ services:
     ports:
       - "6379:6379"
   
-  kafka:
-    image: confluentinc/cp-kafka:latest
+  nats:
+    image: confluentinc/cp-nats:latest
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      nats_ZOOKEEPER_CONNECT: zookeeper:2181
+      nats_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
     ports:
       - "9092:9092"
   
