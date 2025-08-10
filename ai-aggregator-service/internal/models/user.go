@@ -1,52 +1,52 @@
 package models
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 )
 
+// User represents the users table
 type User struct {
-	ID             uuid.UUID `json:"id" db:"id"`
-	OrganizationID uuid.UUID `json:"organization_id" db:"organization_id"`
-	Email          string    `json:"email" db:"email"`
-	Username       string    `json:"username" db:"username"`
-	FullName       string    `json:"full_name" db:"full_name"`
-	AvatarURL      string    `json:"avatar_url" db:"avatar_url"`
-	IsActive       bool      `json:"is_active" db:"is_active"`
-	IsSuperuser    bool      `json:"is_superuser" db:"is_superuser"`
-	CreatedAt      time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
-	Metadata       JSONB     `json:"metadata" db:"metadata"`
+	bun.BaseModel `bun:"table:users"`
+
+	ID             uuid.UUID  `bun:"id,pk,type:uuid,default:gen_random_uuid()"`
+	CreatedAt      time.Time  `bun:"created_at,notnull,default:current_timestamp"`
+	UpdatedAt      time.Time  `bun:"updated_at,notnull,default:current_timestamp"`
+	OrganizationID uuid.UUID  `bun:"organization_id,type:uuid,notnull"`
+	Email          string     `bun:"email,notnull,unique,type:varchar(255)"`
+	FullName       string     `bun:"full_name,type:varchar(255)"`
+	Role           string     `bun:"role,notnull,default:'member',type:varchar(50)"`
+	IsActive       bool       `bun:"is_active,notnull,default:true"`
+	LastLoginAt    *time.Time `bun:"last_login_at"`
+	Metadata       JSONB      `bun:"metadata,type:jsonb,default:'{}'"`
+
+	// Relations
+	Organization    *Organization     `bun:"rel:belongs-to,join:organization_id=id"`
+	APIKeys         []*APIKey         `bun:"rel:has-many,join:id=user_id"`
+	BillingAccounts []*BillingAccount `bun:"rel:has-many,join:id=user_id"`
+	APIRequests     []*APIRequest     `bun:"rel:has-many,join:id=user_id"`
+	RateLimits      []*RateLimit      `bun:"rel:has-many,join:id=user_id"`
 }
 
-type CreateUser struct {
-	OrganizationID uuid.UUID `json:"organization_id" validate:"required"`
-	Email          string    `json:"email" validate:"required,email,max=255"`
-	Username       string    `json:"username" validate:"required,min=3,max=50,alphanum"`
-	FullName       string    `json:"full_name" validate:"required,min=2,max=100"`
-	AvatarURL      string    `json:"avatar_url" validate:"omitempty,url"`
-	Metadata       JSONB     `json:"metadata,omitempty"`
+// TableName returns the table name for User
+func (User) TableName() string {
+	return "users"
 }
 
-type UpdateUser struct {
-	Email     *string `json:"email,omitempty" validate:"omitempty,email,max=255"`
-	Username  *string `json:"username,omitempty" validate:"omitempty,min=3,max=50,alphanum"`
-	FullName  *string `json:"full_name,omitempty" validate:"omitempty,min=2,max=100"`
-	AvatarURL *string `json:"avatar_url,omitempty" validate:"omitempty,url"`
-	IsActive  *bool   `json:"is_active,omitempty"`
-	Metadata  JSONB   `json:"metadata,omitempty"`
-}
+// Ensure User implements bun.BeforeAppendModelHook
+var _ bun.BeforeAppendModelHook = (*User)(nil)
 
-type UserResponse struct {
-	ID             uuid.UUID `json:"id"`
-	OrganizationID uuid.UUID `json:"organization_id"`
-	Email          string    `json:"email"`
-	Username       string    `json:"username"`
-	FullName       string    `json:"full_name"`
-	AvatarURL      string    `json:"avatar_url"`
-	IsActive       bool      `json:"is_active"`
-	IsSuperuser    bool      `json:"is_superuser"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+// BeforeAppendModel implements bun.BeforeAppendModelHook
+func (u *User) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		u.CreatedAt = time.Now()
+		u.UpdatedAt = time.Now()
+	case *bun.UpdateQuery:
+		u.UpdatedAt = time.Now()
+	}
+	return nil
 }

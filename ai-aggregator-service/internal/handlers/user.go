@@ -7,16 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// UserHandler handles user management endpoints
-type UserHandler struct {
-	// TODO: Add service dependencies (user service, api key service, etc.)
-}
-
-// NewUserHandler creates a new user handler
-func NewUserHandler() *UserHandler {
-	return &UserHandler{}
-}
-
 // UserProfile represents user profile information
 type UserProfile struct {
 	ID        string    `json:"id"`
@@ -78,7 +68,7 @@ type CreateAPIKeyResponse struct {
 }
 
 // GetProfile handles GET /users/profile
-func (h *UserHandler) GetProfile(c echo.Context) error {
+func (h *handler) GetProfile(c echo.Context) error {
 	// TODO: Get user ID from context (after authentication middleware)
 	userID := "user_" + generateID()
 
@@ -101,7 +91,7 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 }
 
 // UpdateProfile handles PUT /users/profile
-func (h *UserHandler) UpdateProfile(c echo.Context) error {
+func (h *handler) UpdateProfile(c echo.Context) error {
 	var req UpdateProfileRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -135,7 +125,7 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 }
 
 // GetOrganizations handles GET /users/organizations
-func (h *UserHandler) GetOrganizations(c echo.Context) error {
+func (h *handler) GetOrganizations(c echo.Context) error {
 	// TODO: Get user ID from context
 	// TODO: Fetch user's organizations from database
 
@@ -168,7 +158,7 @@ func (h *UserHandler) GetOrganizations(c echo.Context) error {
 }
 
 // CreateAPIKey handles POST /users/api-keys
-func (h *UserHandler) CreateAPIKey(c echo.Context) error {
+func (h *handler) CreateAPIKey(c echo.Context) error {
 	var req CreateAPIKeyRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -213,7 +203,7 @@ func (h *UserHandler) CreateAPIKey(c echo.Context) error {
 }
 
 // ListAPIKeys handles GET /users/api-keys
-func (h *UserHandler) ListAPIKeys(c echo.Context) error {
+func (h *handler) ListAPIKeys(c echo.Context) error {
 	// TODO: Get user ID from context
 	// TODO: Fetch user's API keys from database
 	// TODO: Support pagination
@@ -257,7 +247,7 @@ func (h *UserHandler) ListAPIKeys(c echo.Context) error {
 }
 
 // RevokeAPIKey handles DELETE /users/api-keys/:key_id
-func (h *UserHandler) RevokeAPIKey(c echo.Context) error {
+func (h *handler) RevokeAPIKey(c echo.Context) error {
 	keyID := c.Param("key_id")
 	if keyID == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -280,7 +270,7 @@ func (h *UserHandler) RevokeAPIKey(c echo.Context) error {
 }
 
 // GetAPIKey handles GET /users/api-keys/:key_id
-func (h *UserHandler) GetAPIKey(c echo.Context) error {
+func (h *handler) GetAPIKey(c echo.Context) error {
 	keyID := c.Param("key_id")
 	if keyID == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -316,7 +306,7 @@ func (h *UserHandler) GetAPIKey(c echo.Context) error {
 }
 
 // UpdateAPIKey handles PUT /users/api-keys/:key_id
-func (h *UserHandler) UpdateAPIKey(c echo.Context) error {
+func (h *handler) UpdateAPIKey(c echo.Context) error {
 	keyID := c.Param("key_id")
 	if keyID == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{

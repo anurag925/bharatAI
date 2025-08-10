@@ -7,16 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// BillingHandler handles billing endpoints
-type BillingHandler struct {
-	// TODO: Add service dependencies (billing service, payment service, etc.)
-}
-
-// NewBillingHandler creates a new billing handler
-func NewBillingHandler() *BillingHandler {
-	return &BillingHandler{}
-}
-
 // BillingAccount represents a billing account
 type BillingAccount struct {
 	ID            string    `json:"id"`
@@ -118,7 +108,7 @@ type AddPaymentMethodRequest struct {
 }
 
 // GetAccount handles GET /billing/account
-func (h *BillingHandler) GetAccount(c echo.Context) error {
+func (h *handler) GetAccount(c echo.Context) error {
 	// TODO: Get user ID from context
 	// TODO: Fetch billing account from database
 
@@ -165,7 +155,7 @@ func (h *BillingHandler) GetAccount(c echo.Context) error {
 }
 
 // GetUsage handles GET /billing/usage
-func (h *BillingHandler) GetUsage(c echo.Context) error {
+func (h *handler) GetUsage(c echo.Context) error {
 	// Parse query parameters
 	startDate := c.QueryParam("start_date")
 	endDate := c.QueryParam("end_date")
@@ -227,7 +217,7 @@ func (h *BillingHandler) GetUsage(c echo.Context) error {
 }
 
 // GetInvoices handles GET /billing/invoices
-func (h *BillingHandler) GetInvoices(c echo.Context) error {
+func (h *handler) GetInvoices(c echo.Context) error {
 	// Parse query parameters
 	limit := c.QueryParam("limit")
 	offset := c.QueryParam("offset")
@@ -309,7 +299,7 @@ func (h *BillingHandler) GetInvoices(c echo.Context) error {
 }
 
 // GetInvoice handles GET /billing/invoices/:invoice_id
-func (h *BillingHandler) GetInvoice(c echo.Context) error {
+func (h *handler) GetInvoice(c echo.Context) error {
 	invoiceID := c.Param("invoice_id")
 	if invoiceID == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -361,7 +351,7 @@ func (h *BillingHandler) GetInvoice(c echo.Context) error {
 }
 
 // AddPaymentMethod handles POST /billing/payment-methods
-func (h *BillingHandler) AddPaymentMethod(c echo.Context) error {
+func (h *handler) AddPaymentMethod(c echo.Context) error {
 	var req AddPaymentMethodRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -393,7 +383,7 @@ func (h *BillingHandler) AddPaymentMethod(c echo.Context) error {
 }
 
 // GetPaymentMethods handles GET /billing/payment-methods
-func (h *BillingHandler) GetPaymentMethods(c echo.Context) error {
+func (h *handler) GetPaymentMethods(c echo.Context) error {
 	// TODO: Get user ID from context
 	// TODO: Fetch payment methods from database
 
@@ -428,7 +418,7 @@ func (h *BillingHandler) GetPaymentMethods(c echo.Context) error {
 }
 
 // DeletePaymentMethod handles DELETE /billing/payment-methods/:payment_method_id
-func (h *BillingHandler) DeletePaymentMethod(c echo.Context) error {
+func (h *handler) DeletePaymentMethod(c echo.Context) error {
 	paymentMethodID := c.Param("payment_method_id")
 	if paymentMethodID == "" {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -452,7 +442,7 @@ func (h *BillingHandler) DeletePaymentMethod(c echo.Context) error {
 }
 
 // UpdatePlan handles PUT /billing/plan
-func (h *BillingHandler) UpdatePlan(c echo.Context) error {
+func (h *handler) UpdatePlan(c echo.Context) error {
 	var req struct {
 		PlanID string `json:"plan_id" validate:"required"`
 	}
@@ -478,7 +468,7 @@ func (h *BillingHandler) UpdatePlan(c echo.Context) error {
 }
 
 // GetPlans handles GET /billing/plans
-func (h *BillingHandler) GetPlans(c echo.Context) error {
+func (h *handler) GetPlans(c echo.Context) error {
 	// Mock response for now
 	plans := []Plan{
 		{

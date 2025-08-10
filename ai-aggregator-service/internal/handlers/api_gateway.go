@@ -9,16 +9,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-// APIGatewayHandler handles API gateway functionality
-type APIGatewayHandler struct{}
-
-// NewAPIGatewayHandler creates a new API gateway handler
-func NewAPIGatewayHandler() *APIGatewayHandler {
-	return &APIGatewayHandler{}
-}
-
 // SetupMiddleware configures global middleware for the API gateway
-func (h *APIGatewayHandler) SetupMiddleware(e *echo.Echo) {
+func (h *handler) SetupMiddleware(e *echo.Echo) {
 	// CORS middleware
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"*"},
@@ -49,7 +41,7 @@ func (h *APIGatewayHandler) SetupMiddleware(e *echo.Echo) {
 }
 
 // loggingMiddleware logs HTTP requests and responses
-func (h *APIGatewayHandler) loggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (h *handler) loggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		start := time.Now()
 
@@ -72,7 +64,7 @@ func (h *APIGatewayHandler) loggingMiddleware(next echo.HandlerFunc) echo.Handle
 }
 
 // rateLimitMiddleware implements rate limiting
-func (h *APIGatewayHandler) rateLimitMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (h *handler) rateLimitMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		// TODO: Implement actual rate limiting based on user/API key
 		// For now, we'll use a simple IP-based rate limiter
@@ -93,7 +85,7 @@ func (h *APIGatewayHandler) rateLimitMiddleware(next echo.HandlerFunc) echo.Hand
 }
 
 // getClientIdentifier returns a unique identifier for rate limiting
-func (h *APIGatewayHandler) getClientIdentifier(c echo.Context) string {
+func (h *handler) getClientIdentifier(c echo.Context) string {
 	// Check for API key in header
 	apiKey := c.Request().Header.Get("X-API-Key")
 	if apiKey != "" {
@@ -111,7 +103,7 @@ func (h *APIGatewayHandler) getClientIdentifier(c echo.Context) string {
 }
 
 // HealthCheckHandler handles health check endpoint
-func (h *APIGatewayHandler) HealthCheckHandler(c echo.Context) error {
+func (h *handler) HealthCheckHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":    "healthy",
 		"timestamp": time.Now().UTC(),
@@ -120,7 +112,7 @@ func (h *APIGatewayHandler) HealthCheckHandler(c echo.Context) error {
 }
 
 // NotFoundHandler handles 404 errors
-func (h *APIGatewayHandler) NotFoundHandler(c echo.Context) error {
+func (h *handler) NotFoundHandler(c echo.Context) error {
 	return c.JSON(http.StatusNotFound, map[string]interface{}{
 		"error": map[string]interface{}{
 			"code":    "NOT_FOUND",
@@ -131,7 +123,7 @@ func (h *APIGatewayHandler) NotFoundHandler(c echo.Context) error {
 }
 
 // MethodNotAllowedHandler handles 405 errors
-func (h *APIGatewayHandler) MethodNotAllowedHandler(c echo.Context) error {
+func (h *handler) MethodNotAllowedHandler(c echo.Context) error {
 	return c.JSON(http.StatusMethodNotAllowed, map[string]interface{}{
 		"error": map[string]interface{}{
 			"code":    "METHOD_NOT_ALLOWED",

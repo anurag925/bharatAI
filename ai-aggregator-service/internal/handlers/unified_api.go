@@ -7,16 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// UnifiedAPIHandler handles unified API endpoints
-type UnifiedAPIHandler struct {
-	// TODO: Add service dependencies
-}
-
-// NewUnifiedAPIHandler creates a new unified API handler
-func NewUnifiedAPIHandler() *UnifiedAPIHandler {
-	return &UnifiedAPIHandler{}
-}
-
 // ChatCompletionsRequest represents the request structure for chat completions
 type ChatCompletionsRequest struct {
 	Model       string        `json:"model" validate:"required"`
@@ -107,7 +97,7 @@ type Model struct {
 }
 
 // ChatCompletions handles POST /v1/chat/completions
-func (h *UnifiedAPIHandler) ChatCompletions(c echo.Context) error {
+func (h *handler) ChatCompletions(c echo.Context) error {
 	var req ChatCompletionsRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -150,7 +140,7 @@ func (h *UnifiedAPIHandler) ChatCompletions(c echo.Context) error {
 }
 
 // Completions handles POST /v1/completions
-func (h *UnifiedAPIHandler) Completions(c echo.Context) error {
+func (h *handler) Completions(c echo.Context) error {
 	var req CompletionsRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -190,7 +180,7 @@ func (h *UnifiedAPIHandler) Completions(c echo.Context) error {
 }
 
 // Embeddings handles POST /v1/embeddings
-func (h *UnifiedAPIHandler) Embeddings(c echo.Context) error {
+func (h *handler) Embeddings(c echo.Context) error {
 	var req EmbeddingsRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -236,7 +226,7 @@ func (h *UnifiedAPIHandler) Embeddings(c echo.Context) error {
 }
 
 // ListModels handles GET /v1/models
-func (h *UnifiedAPIHandler) ListModels(c echo.Context) error {
+func (h *handler) ListModels(c echo.Context) error {
 	// Mock models list
 	models := []Model{
 		{
@@ -272,7 +262,7 @@ func (h *UnifiedAPIHandler) ListModels(c echo.Context) error {
 }
 
 // GetModel handles GET /v1/models/{model_id}
-func (h *UnifiedAPIHandler) GetModel(c echo.Context) error {
+func (h *handler) GetModel(c echo.Context) error {
 	modelID := c.Param("model_id")
 
 	// Mock model lookup

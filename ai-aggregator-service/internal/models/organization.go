@@ -1,50 +1,50 @@
 package models
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 )
 
+// Organization represents the organizations table
 type Organization struct {
-	ID          uuid.UUID `json:"id" db:"id"`
-	Name        string    `json:"name" db:"name"`
-	DisplayName string    `json:"display_name" db:"display_name"`
-	Description string    `json:"description" db:"description"`
-	Website     string    `json:"website" db:"website"`
-	LogoURL     string    `json:"logo_url" db:"logo_url"`
-	IsActive    bool      `json:"is_active" db:"is_active"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
-	Metadata    JSONB     `json:"metadata" db:"metadata"`
+	bun.BaseModel `bun:"table:organizations"`
+
+	ID           uuid.UUID `bun:"id,pk,type:uuid,default:gen_random_uuid()"`
+	CreatedAt    time.Time `bun:"created_at,notnull,default:current_timestamp"`
+	UpdatedAt    time.Time `bun:"updated_at,notnull,default:current_timestamp"`
+	Name         string    `bun:"name,notnull,type:varchar(255)"`
+	Slug         string    `bun:"slug,notnull,unique,type:varchar(100)"`
+	PlanType     string    `bun:"plan_type,notnull,default:'free',type:varchar(50)"`
+	BillingEmail string    `bun:"billing_email,type:varchar(255)"`
+	Metadata     JSONB     `bun:"metadata,type:jsonb,default:'{}'"`
+	IsActive     bool      `bun:"is_active,notnull,default:true"`
+
+	// Relations
+	Users           []*User           `bun:"rel:has-many,join:id=organization_id"`
+	APIKeys         []*APIKey         `bun:"rel:has-many,join:id=organization_id"`
+	BillingAccounts []*BillingAccount `bun:"rel:has-many,join:id=organization_id"`
+	RateLimits      []*RateLimit      `bun:"rel:has-many,join:id=organization_id"`
 }
 
-type CreateOrganization struct {
-	Name        string `json:"name" validate:"required,min=3,max=100"`
-	DisplayName string `json:"display_name" validate:"required,min=3,max=100"`
-	Description string `json:"description" validate:"max=500"`
-	Website     string `json:"website" validate:"omitempty,url"`
-	LogoURL     string `json:"logo_url" validate:"omitempty,url"`
-	Metadata    JSONB  `json:"metadata,omitempty"`
+// TableName returns the table name for Organization
+func (Organization) TableName() string {
+	return "organizations"
 }
 
-type UpdateOrganization struct {
-	DisplayName *string `json:"display_name,omitempty" validate:"omitempty,min=3,max=100"`
-	Description *string `json:"description,omitempty" validate:"omitempty,max=500"`
-	Website     *string `json:"website,omitempty" validate:"omitempty,url"`
-	LogoURL     *string `json:"logo_url,omitempty" validate:"omitempty,url"`
-	IsActive    *bool   `json:"is_active,omitempty"`
-	Metadata    JSONB   `json:"metadata,omitempty"`
-}
+// Ensure Organization implements bun.BeforeAppendModelHook
+var _ bun.BeforeAppendModelHook = (*Organization)(nil)
 
-type OrganizationResponse struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	DisplayName string    `json:"display_name"`
-	Description string    `json:"description"`
-	Website     string    `json:"website"`
-	LogoURL     string    `json:"logo_url"`
-	IsActive    bool      `json:"is_active"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+// BeforeAppendModel implements bun.BeforeAppendModelHook
+func (o *Organization) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		o.CreatedAt = time.Now()
+		o.UpdatedAt = time.Now()
+	case *bun.UpdateQuery:
+		o.UpdatedAt = time.Now()
+	}
+	return nil
 }

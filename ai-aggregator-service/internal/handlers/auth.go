@@ -6,16 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// AuthHandler handles authentication endpoints
-type AuthHandler struct {
-	// TODO: Add service dependencies (user service, token service, etc.)
-}
-
-// NewAuthHandler creates a new auth handler
-func NewAuthHandler() *AuthHandler {
-	return &AuthHandler{}
-}
-
 // LoginRequest represents the login request structure
 type LoginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
@@ -71,7 +61,7 @@ type LogoutRequest struct {
 }
 
 // Login handles POST /auth/login
-func (h *AuthHandler) Login(c echo.Context) error {
+func (h *handler) Login(c echo.Context) error {
 	var req LoginRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -105,7 +95,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 }
 
 // Register handles POST /auth/register
-func (h *AuthHandler) Register(c echo.Context) error {
+func (h *handler) Register(c echo.Context) error {
 	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -138,7 +128,7 @@ func (h *AuthHandler) Register(c echo.Context) error {
 }
 
 // RefreshToken handles POST /auth/refresh
-func (h *AuthHandler) RefreshToken(c echo.Context) error {
+func (h *handler) RefreshToken(c echo.Context) error {
 	var req RefreshTokenRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -165,7 +155,7 @@ func (h *AuthHandler) RefreshToken(c echo.Context) error {
 }
 
 // Logout handles POST /auth/logout
-func (h *AuthHandler) Logout(c echo.Context) error {
+func (h *handler) Logout(c echo.Context) error {
 	var req LogoutRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -187,7 +177,7 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 }
 
 // Me handles GET /auth/me (get current user info)
-func (h *AuthHandler) Me(c echo.Context) error {
+func (h *handler) Me(c echo.Context) error {
 	// TODO: Get user from context (after authentication middleware)
 	// Mock response for now
 	user := UserInfo{
@@ -201,7 +191,7 @@ func (h *AuthHandler) Me(c echo.Context) error {
 }
 
 // ForgotPassword handles POST /auth/forgot-password
-func (h *AuthHandler) ForgotPassword(c echo.Context) error {
+func (h *handler) ForgotPassword(c echo.Context) error {
 	var req struct {
 		Email string `json:"email" validate:"required,email"`
 	}
@@ -225,7 +215,7 @@ func (h *AuthHandler) ForgotPassword(c echo.Context) error {
 }
 
 // ResetPassword handles POST /auth/reset-password
-func (h *AuthHandler) ResetPassword(c echo.Context) error {
+func (h *handler) ResetPassword(c echo.Context) error {
 	var req struct {
 		Token       string `json:"token" validate:"required"`
 		NewPassword string `json:"new_password" validate:"required,min=8"`

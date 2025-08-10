@@ -1,62 +1,53 @@
 package models
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 )
 
+// Provider represents the providers table
 type Provider struct {
-	ID               uuid.UUID `json:"id" db:"id"`
-	Name             string    `json:"name" db:"name"`
-	DisplayName      string    `json:"display_name" db:"display_name"`
-	Description      string    `json:"description" db:"description"`
-	LogoURL          string    `json:"logo_url" db:"logo_url"`
-	Website          string    `json:"website" db:"website"`
-	DocumentationURL string    `json:"documentation_url" db:"documentation_url"`
-	BaseURL          string    `json:"base_url" db:"base_url"`
-	APIVersion       string    `json:"api_version" db:"api_version"`
-	IsActive         bool      `json:"is_active" db:"is_active"`
-	Config           JSONB     `json:"config" db:"config"`
-	CreatedAt        time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at" db:"updated_at"`
+	bun.BaseModel `bun:"table:providers"`
+
+	ID                uuid.UUID `bun:"id,pk,type:uuid,default:gen_random_uuid()"`
+	CreatedAt         time.Time `bun:"created_at,notnull,default:current_timestamp"`
+	UpdatedAt         time.Time `bun:"updated_at,notnull,default:current_timestamp"`
+	Name              string    `bun:"name,notnull,unique,type:varchar(100)"`
+	DisplayName       string    `bun:"display_name,notnull,type:varchar(255)"`
+	BaseURL           string    `bun:"base_url,notnull,type:varchar(500)"`
+	APIKeyRequired    bool      `bun:"api_key_required,notnull,default:true"`
+	IsActive          bool      `bun:"is_active,notnull,default:true"`
+	RateLimitRPM      int       `bun:"rate_limit_rpm,default:1000"`
+	RateLimitTPM      int       `bun:"rate_limit_tpm,default:100000"`
+	Config            JSONB     `bun:"config,type:jsonb,default:'{}'"`
+	SupportedFeatures JSONB     `bun:"supported_features,type:jsonb,default:'[]'"`
+
+	// Relations
+	Models       []*Model       `bun:"rel:has-many,join:id=provider_id"`
+	APIRequests  []*APIRequest  `bun:"rel:has-many,join:id=provider_id"`
+	APIResponses []*APIResponse `bun:"rel:has-many,join:id=provider_id"`
+	RateLimits   []*RateLimit   `bun:"rel:has-many,join:id=provider_id"`
 }
 
-type CreateProvider struct {
-	Name             string `json:"name" validate:"required,min=2,max=50"`
-	DisplayName      string `json:"display_name" validate:"required,min=2,max=100"`
-	Description      string `json:"description" validate:"max=500"`
-	LogoURL          string `json:"logo_url" validate:"omitempty,url"`
-	Website          string `json:"website" validate:"omitempty,url"`
-	DocumentationURL string `json:"documentation_url" validate:"omitempty,url"`
-	BaseURL          string `json:"base_url" validate:"required,url"`
-	APIVersion       string `json:"api_version" validate:"required,max=20"`
-	Config           JSONB  `json:"config,omitempty"`
+// TableName returns the table name for Provider
+func (Provider) TableName() string {
+	return "providers"
 }
 
-type UpdateProvider struct {
-	DisplayName      *string `json:"display_name,omitempty" validate:"omitempty,min=2,max=100"`
-	Description      *string `json:"description,omitempty" validate:"omitempty,max=500"`
-	LogoURL          *string `json:"logo_url,omitempty" validate:"omitempty,url"`
-	Website          *string `json:"website,omitempty" validate:"omitempty,url"`
-	DocumentationURL *string `json:"documentation_url,omitempty" validate:"omitempty,url"`
-	BaseURL          *string `json:"base_url,omitempty" validate:"omitempty,url"`
-	APIVersion       *string `json:"api_version,omitempty" validate:"omitempty,max=20"`
-	IsActive         *bool   `json:"is_active,omitempty"`
-	Config           JSONB   `json:"config,omitempty"`
-}
+// Ensure Provider implements bun.BeforeAppendModelHook
+var _ bun.BeforeAppendModelHook = (*Provider)(nil)
 
-type ProviderResponse struct {
-	ID               uuid.UUID `json:"id"`
-	Name             string    `json:"name"`
-	DisplayName      string    `json:"display_name"`
-	Description      string    `json:"description"`
-	LogoURL          string    `json:"logo_url"`
-	Website          string    `json:"website"`
-	DocumentationURL string    `json:"documentation_url"`
-	BaseURL          string    `json:"base_url"`
-	APIVersion       string    `json:"api_version"`
-	IsActive         bool      `json:"is_active"`
-	CreatedAt        time.Time `json:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at"`
+// BeforeAppendModel implements bun.BeforeAppendModelHook
+func (p *Provider) BeforeAppendModel(ctx context.Context, query bun.Query) error {
+	switch query.(type) {
+	case *bun.InsertQuery:
+		p.CreatedAt = time.Now()
+		p.UpdatedAt = time.Now()
+	case *bun.UpdateQuery:
+		p.UpdatedAt = time.Now()
+	}
+	return nil
 }
