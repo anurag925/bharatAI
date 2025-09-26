@@ -1,4 +1,4 @@
-.PHONY: help build run test clean docker-build docker-run deps lint fmt vet tidy
+.PHONY: help build run test clean docker-build docker-run deps lint fmt vet tidy docs
 
 # Default target
 help: ## Display this help message
@@ -123,7 +123,11 @@ install-tools: ## Install development tools
 
 # Documentation
 docs: ## Generate API documentation
-	swag init -g cmd/api-gateway/main.go
+	swag init -g cmd/api/main.go
+	swag fmt
+
+mocks:
+	mockery --all --with-expecter=true
 
 # Monitoring
 prometheus: ## Start Prometheus for monitoring

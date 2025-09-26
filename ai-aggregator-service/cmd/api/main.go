@@ -2,6 +2,7 @@ package main
 
 import (
 	"ai-aggregator-service/internal/config"
+	"ai-aggregator-service/internal/handlers"
 	"ai-aggregator-service/internal/logger"
 	"context"
 	"fmt"
@@ -16,6 +17,12 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+// @title Bharat AI API
+// @version 1.0
+// @description This is a sample server for Bharat AI API.
+// @securityDefinitions.apikey	Bearer
+// @in							header
+// @name						Authorization
 func main() {
 	// Load configuration
 	cfg, err := config.LoadConfig()
@@ -40,25 +47,7 @@ func main() {
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Gzip())
 
-	// Health check endpoint
-	e.GET("/health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{
-			"status":    "ok",
-			"service":   "api-gateway",
-			"timestamp": time.Now().Format(time.RFC3339),
-		})
-	})
-
-	// API routes
-	api := e.Group("/api/v1")
-
-	// Routes will be added here
-	api.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{
-			"message": "AI Aggregator API Gateway",
-			"version": "1.0.0",
-		})
-	})
+	handlers.SetupRoutes(e)
 
 	address := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 	// Start server
